@@ -1,13 +1,32 @@
 'use client'
-import { useState } from 'react'
-import AddTaskForm from '@/app/components/AddTaskForm.js'
+import { useState, useEffect } from 'react'
+import AddTaskForm from '@/app/components/AddTaskForm'
 import Column from '@/app/components/Column'
 
 export default function Page() {
- 
+  
   const [tasks, setTasks] = useState([])
 
+  
+  const [loaded, setLoaded] = useState(false)
+
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('tasks')
+    if (saved) {
+      setTasks(JSON.parse(saved))
+    }
+    setLoaded(true)
+  }, [])
+
  
+  useEffect(() => {
+    if (loaded) {
+      localStorage.setItem('tasks', JSON.stringify(tasks))
+    }
+  }, [tasks, loaded])
+
+  
   function addTask(data) {
     const taskToAdd = {
       id: Date.now(),
@@ -23,7 +42,7 @@ export default function Page() {
     setTasks(tasks.concat([taskToAdd]))
   }
 
-  
+ 
   function changeStatus(id, newStatus) {
     const updatedTasks = tasks.map((task) => {
       if (task.id === id) {
@@ -35,7 +54,8 @@ export default function Page() {
     setTasks(updatedTasks)
   }
 
- function saveEdit(id, changes) {
+  
+  function saveEdit(id, changes) {
     const updatedTasks = tasks.map((task) => {
       if (task.id === id) {
         return {
@@ -44,7 +64,7 @@ export default function Page() {
           description: changes.description,
           priority: changes.priority,
           deadline: changes.deadline,
-          updatedAt: Date.now(), 
+          updatedAt: Date.now(),
         }
       }
       return task
